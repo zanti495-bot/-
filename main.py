@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import os
 from pathlib import Path
 
 from aiogram import Bot, Dispatcher, Router
@@ -43,11 +44,16 @@ async def notify_join_request(request: ChatJoinRequest, bot: Bot) -> None:
 
 
 async def main() -> None:
-    token_file = Path(__file__).with_name("token.txt")
-    token = token_file.read_text(encoding="utf-8").strip()
+    token = os.getenv("BOT_TOKEN", "").strip()
+    if not token:
+        token_file = Path(__file__).with_name("token.txt")
+        if token_file.is_file():
+            token = token_file.read_text(encoding="utf-8").strip()
+
     if not token:
         raise RuntimeError(
-            f"Файл {token_file} пуст. Впишите в него токен бота."
+            "Токен не задан: установите переменную BOT_TOKEN "
+            "или создайте token.txt рядом с main.py."
         )
 
     bot = Bot(token=token)
